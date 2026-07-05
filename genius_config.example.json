@@ -1,0 +1,23 @@
+{
+  "contentBuilderPath": "C:\\Path\\To\\steamworks_sdk\\tools\\ContentBuilder",
+  "steamUsername": "your_steam_username",
+  "profiles": [
+    {
+      "id": "00000000000000000000000000000000",
+      "name": "Örnek Build",
+      "appID": "480",
+      "description": "Örnek profil - kendi App ID'nizle değiştirin",
+      "branch": "",
+      "preview": false,
+      "depots": [
+        {
+          "depotID": "481",
+          "contentPath": "C:\\Path\\To\\game\\build",
+          "exclusions": [
+            "*.pdb"
+          ]
+        }
+      ]
+    }
+  ]
+}

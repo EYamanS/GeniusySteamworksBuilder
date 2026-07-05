@@ -1,0 +1,25 @@
+# --- Build artefacts ---
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.spec.bak
+
+# --- Local config (contains real App/Depot IDs and machine paths) ---
+genius_config.json
+
+# --- Steamworks SDK is NOT redistributable, keep it out ---
+# (this repo intentionally ships only the builder tool)
+tools/
+redistributable_bin/
+steamworksexample/
+glmgr/
+public/
+
+# --- Editor / OS junk ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

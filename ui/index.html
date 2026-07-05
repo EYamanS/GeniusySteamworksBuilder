@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENIUSY'S Steamworks Builder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+
+    <div class="rz rz-t"  data-edge="top"></div>
+    <div class="rz rz-b"  data-edge="bottom"></div>
+    <div class="rz rz-l"  data-edge="left"></div>
+    <div class="rz rz-r"  data-edge="right"></div>
+    <div class="rz rz-tl" data-edge="topleft"></div>
+    <div class="rz rz-tr" data-edge="topright"></div>
+    <div class="rz rz-bl" data-edge="bottomleft"></div>
+    <div class="rz rz-br" data-edge="bottomright"></div>
+
+    <div id="titlebar" class="titlebar">
+        <div class="titlebar-drag pywebview-drag-region" id="titlebarDrag">
+            <div class="titlebar-brand">
+                <span class="titlebar-name">GENIUSY'S Steamworks Builder</span>
+            </div>
+        </div>
+        <div class="window-controls">
+            <button class="win-btn" id="winMinBtn" title="Minimize" tabindex="-1">
+                <svg viewBox="0 0 12 12" width="11" height="11"><rect x="1.5" y="5.5" width="9" height="1" rx="0.5" fill="currentColor"/></svg>
+            </button>
+            <button class="win-btn" id="winMaxBtn" title="Maximize" tabindex="-1">
+                <svg viewBox="0 0 12 12" width="11" height="11"><rect x="2" y="2" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>
+            </button>
+            <button class="win-btn win-btn-close" id="winCloseBtn" title="Close" tabindex="-1">
+                <svg viewBox="0 0 12 12" width="11" height="11"><path d="M3 3 L9 9 M9 3 L3 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="libraryView" class="view">
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo"><img src="Icon.png" alt="G"></div>
+                <div class="brand-text">
+                    <span class="brand-title">GENIUSY'S</span>
+                    <span class="brand-sub">Steamworks Builder</span>
+                </div>
+                <a class="brand-link" href="https://www.enesborekci.com.tr" target="_blank" rel="noopener noreferrer">www.enesborekci.com.tr</a>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-ghost btn-sm delete-all-btn" id="deleteAllBtn" data-i18n-title="deleteAll_title" title="Hold to delete all games">
+                    <span class="da-fill"></span>
+                    <span class="da-label" data-i18n="deleteAll">Delete All Games</span>
+                </button>
+                <button class="btn btn-ghost btn-sm" id="importBtn" data-i18n="import" data-i18n-title="import_title" title="Import existing vdf files from the scripts folder">Import</button>
+                <button class="btn btn-ghost btn-sm" id="settingsBtn"><span class="gear">⚙</span> <span data-i18n="settings">Settings</span></button>
+                <div class="lang-switch" id="langSwitch">
+                    <button class="lang-btn" id="langBtn" data-i18n-title="langTitle" title="Language">🌐</button>
+                    <div class="lang-menu hidden" id="langMenu">
+                        <button class="lang-opt" data-lang="en">English</button>
+                        <button class="lang-opt" data-lang="tr">Türkçe</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="library-scroll">
+            <div id="gameGrid" class="game-grid"></div>
+
+            <div id="emptyLibrary" class="empty-library hidden">
+                <div class="empty-logo"><img src="Icon.png" alt="G"></div>
+                <h2 data-i18n="library_empty_title">No games yet</h2>
+                <p data-i18n="library_empty_body">Add your first game to start uploading builds to Steam.</p>
+                <button class="btn btn-primary btn-lg" id="emptyNewGameBtn" data-i18n="newGame">+ New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameView" class="view hidden">
+        <div class="game-hero" id="gameHero">
+            <div class="hero-bg" id="heroBg"></div>
+            <div class="hero-shade"></div>
+            <div class="hero-content">
+                <button class="btn btn-back" id="backBtn"><span class="back-arrow">←</span> <span data-i18n="back">Library</span></button>
+                <div class="hero-bottom">
+                    <input type="text" id="pName" class="game-name-input" data-i18n-ph="pName_ph" placeholder="Game name">
+                    <button class="btn btn-ghost btn-sm danger-text" id="deleteProfileBtn" data-i18n="deleteGame">Delete Game</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-body">
+            <div class="grid-3">
+                <div class="field">
+                    <label data-i18n="appId">Steam App ID</label>
+                    <input type="text" id="pAppID" data-i18n-ph="appId_ph" placeholder="e.g. 1001270">
+                </div>
+                <div class="field">
+                    <label><span data-i18n="branch">Beta Branch (setlive)</span> <span class="hint" data-i18n="branch_hint">empty = default/public</span></label>
+                    <input type="text" id="pBranch" data-i18n-ph="branch_ph" placeholder="e.g. beta (leave empty = default)">
+                </div>
+                <div class="field">
+                    <label data-i18n="desc">Build Description</label>
+                    <input type="text" id="pDesc" data-i18n-ph="desc_ph" placeholder="e.g. Test build">
+                </div>
+            </div>
+
+            <div class="depots-head">
+                <label class="section-label" data-i18n="depots">Depots</label>
+                <button class="btn btn-ghost btn-xs" id="addDepotBtn" data-i18n="addDepot">+ Add Depot</button>
+            </div>
+            <div id="depotList" class="depot-list"></div>
+        </div>
+
+        <div class="build-bar">
+            <button class="btn btn-build" id="buildBtn" data-i18n="build">▶ BUILD &amp; UPLOAD</button>
+            <button class="btn btn-secondary" id="previewBuildBtn" data-i18n="previewBuild">Preview Build</button>
+            <div class="spacer"></div>
+            <button class="btn btn-ghost" id="openContentBtn" data-i18n="openContent" data-i18n-title="openContent_title" title="Open content folder">📁 Content</button>
+            <button class="btn btn-ghost" id="partnerBtn" data-i18n="partner" data-i18n-title="partner_title" title="Steamworks partner page">Partner ↗</button>
+        </div>
+
+        <section id="consolePanel" class="console-panel hidden">
+            <div class="console-head">
+                <span class="console-title" data-i18n="consoleTitle">Build Console</span>
+                <span id="buildStatus" class="build-status"></span>
+                <div class="console-actions">
+                    <button class="btn btn-ghost btn-xs" id="clearConsoleBtn" data-i18n="clear">Clear</button>
+                    <button class="btn btn-ghost btn-xs danger-text" id="cancelBuildBtn" data-i18n="cancel">Cancel</button>
+                    <button class="btn btn-ghost btn-xs hidden" id="closeConsoleBtn" data-i18n="close">Close</button>
+                </div>
+            </div>
+            <pre id="console" class="console"></pre>
+        </section>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="newGameModal">
+    <div class="modal">
+        <div class="modal-head">
+            <h3 data-i18n="newGameTitle">Add New Game</h3>
+            <button class="modal-close" id="closeNewGameBtn">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                <label data-i18n="gName">Game Name</label>
+                <input type="text" id="ngName" data-i18n-ph="gName_ph" placeholder="e.g. My Game">
+            </div>
+            <div class="field">
+                <label data-i18n="appId">Steam App ID</label>
+                <input type="text" id="ngAppID" data-i18n-ph="appId_ph" placeholder="e.g. 480">
+            </div>
+            <div class="field">
+                <label><span data-i18n="gFolder">Content Folder</span> <span class="hint" data-i18n="gFolder_hint">the build folder to upload</span></label>
+                <div class="path-row">
+                    <input type="text" id="ngFolder" data-i18n-ph="contentFolder_ph" placeholder="build folder to upload">
+                    <button class="btn btn-ghost btn-sm" id="ngBrowseBtn" data-i18n="browse">Browse</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <div class="spacer"></div>
+            <button class="btn btn-ghost btn-sm" id="cancelNewGameBtn" data-i18n="cancelBtn">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="createGameBtn" data-i18n="create">Add Game</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal">
+        <div class="modal-head">
+            <h3 data-i18n="settingsTitle">Settings</h3>
+            <button class="modal-close" id="closeSettingsBtn">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                <label><span data-i18n="cbFolder">ContentBuilder Folder</span> <span class="hint" data-i18n="cbFolder_hint">location of steamcmd.exe</span></label>
+                <div class="path-row">
+                    <input type="text" id="sContentBuilder" data-i18n-ph="cbFolder_ph" placeholder="...\tools\ContentBuilder">
+                    <button class="btn btn-ghost btn-sm" id="browseCbBtn" data-i18n="browse">Browse</button>
+                </div>
+                <div id="cbStatus" class="path-status"></div>
+            </div>
+            <div class="field">
+                <label data-i18n="steamUser">Steam Username</label>
+                <input type="text" id="sUsername" data-i18n-ph="steamUser_ph" placeholder="steam username">
+            </div>
+            <div class="field">
+                <label><span data-i18n="steamPass">Steam Password</span> <span class="hint" data-i18n="steamPass_hint">stored securely in Windows Credential Manager</span></label>
+                <input type="password" id="sPassword" data-i18n-ph="steamPass_ph" placeholder="●●●●●●  (leave empty to keep unchanged)">
+                <div id="pwStatus" class="path-status"></div>
+            </div>
+            <div class="info-box" data-i18n-html="guardInfo">
+                <b>Steam Guard:</b> If a 2FA code is required on the first build, the app will ask you.
+                After one successful login, steamcmd caches the session and no code is needed on later builds.
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm danger-text" id="clearPwBtn" data-i18n="clearPw">Delete Password</button>
+            <div class="spacer"></div>
+            <button class="btn btn-ghost btn-sm" id="cancelSettingsBtn" data-i18n="cancelBtn">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="saveSettingsBtn" data-i18n="save">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="guardModal">
+    <div class="modal modal-sm">
+        <div class="modal-head"><h3 data-i18n="guardTitle">Steam Guard Code</h3></div>
+        <div class="modal-body">
+            <p id="guardPrompt" class="guard-prompt" data-i18n="guardPrompt">Enter your Steam Guard code:</p>
+            <input type="text" id="guardCode" class="guard-input" maxlength="10" autocomplete="off" placeholder="XXXXX">
+        </div>
+        <div class="modal-foot">
+            <div class="spacer"></div>
+            <button class="btn btn-primary btn-sm" id="submitGuardBtn" data-i18n="submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="deleteAllModal">
+    <div class="modal modal-sm">
+        <div class="modal-head"><h3 data-i18n="deleteAllTitle">Delete All Games</h3></div>
+        <div class="modal-body">
+            <p class="guard-prompt" data-i18n="deleteAllConfirm">Are you sure you want to delete all the saved settings?</p>
+        </div>
+        <div class="modal-foot">
+            <div class="spacer"></div>
+            <button class="btn btn-ghost btn-sm" id="deleteAllNoBtn" data-i18n="no">No</button>
+            <button class="btn btn-sm danger-solid" id="deleteAllYesBtn" data-i18n="yes">Yes</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay hidden" id="deleteGameModal">
+    <div class="modal modal-sm">
+        <div class="modal-head"><h3 data-i18n="deleteGameTitle">Delete Game</h3></div>
+        <div class="modal-body">
+            <p class="guard-prompt" data-i18n="deleteGameConfirm">Are you sure you want to delete this game?</p>
+        </div>
+        <div class="modal-foot">
+            <div class="spacer"></div>
+            <button class="btn btn-ghost btn-sm" id="deleteGameNoBtn" data-i18n="no">No</button>
+            <button class="btn btn-sm danger-solid" id="deleteGameYesBtn" data-i18n="yes">Yes</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
