@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:  # manual run builds the artifacts without creating a release
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build .exe
+        run: python -m PyInstaller --noconfirm --clean GENIUS.spec
+      - name: Rename for release
+        shell: pwsh
+        run: Move-Item "dist/GENIUS Steamworks Builder.exe" "dist/GENIUS.Steamworks.Builder-windows-x64.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: dist/GENIUS.Steamworks.Builder-windows-x64.exe
+
+  build-macos:
+    runs-on: macos-latest  # arm64 (Apple Silicon)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build .app
+        run: python -m PyInstaller --noconfirm --clean GENIUS.spec
+      - name: Zip the app bundle
+        run: cd dist && ditto -c -k --keepParent "GENIUS Steamworks Builder.app" GENIUS.Steamworks.Builder-macos-arm64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: dist/GENIUS.Steamworks.Builder-macos-arm64.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            dist/*

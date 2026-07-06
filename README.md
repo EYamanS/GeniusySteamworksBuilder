@@ -95,6 +95,10 @@ build_exe.bat      # Windows  ->  dist\GENIUS Steamworks Builder.exe
 ./build_app.sh     # macOS    ->  dist/GENIUS Steamworks Builder.app
 ```
 
+**Automated releases:** pushing a tag like `v1.2.0` runs a GitHub Actions
+workflow that builds the Windows `.exe` and the macOS `.app` and attaches both
+to a new GitHub release automatically.
+
 ## First-time setup
 
 1. Open the app → **Settings** opens automatically.
