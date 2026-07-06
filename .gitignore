@@ -5,6 +5,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.spec.bak
+.venv/
 
 # --- Local config (contains real App/Depot IDs and machine paths) ---
 genius_config.json

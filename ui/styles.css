@@ -86,6 +86,12 @@ html, body {
     color: var(--text-dim);
 }
 
+/* macOS: native traffic lights + native resize replace the custom chrome. */
+body.mac .rz { display: none; }
+body.mac .window-controls { display: none; }
+body.mac .titlebar-drag { padding-left: 82px; }  /* room for the traffic lights */
+body.mac #app { border-radius: 0; }              /* the native window already rounds */
+
 .window-controls { display: flex; align-items: stretch; height: 100%; -webkit-app-region: no-drag; }
 .win-btn {
     width: 46px; height: 100%;

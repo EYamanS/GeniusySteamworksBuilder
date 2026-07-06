@@ -2,6 +2,7 @@
 let STATE = { config: {}, profiles: [], contentBuilderOk: false, contentBuilderMsgKey: "", contentBuilderMsgParams: {} };
 let selectedId = null;
 let building = false;
+let IS_MAC = false;
 
 const $ = (id) => document.getElementById(id);
 
@@ -20,6 +21,8 @@ async function init() {
     applyStaticTranslations();
     bindLangSwitch();
     STATE = await api().get_state();
+    IS_MAC = STATE.platform === "darwin";
+    document.body.classList.toggle("mac", IS_MAC);
     renderLibrary();
     if (!STATE.contentBuilderOk || !STATE.config.steamUsername) {
         openSettings();
@@ -29,6 +32,9 @@ async function init() {
 }
 
 function bindWindowControls() {
+    // macOS uses the native traffic lights + native resize; the custom
+    // controls and edge handles only exist for the Windows frameless window.
+    if (IS_MAC) return;
     $("winMinBtn").onclick = () => api().win_minimize();
     $("winCloseBtn").onclick = () => api().win_close();
     const toggleMax = () => api().win_toggle_maximize();

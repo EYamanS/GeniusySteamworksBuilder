@@ -1,13 +1,19 @@
 
-import ctypes
-from ctypes import wintypes
 import json
+import subprocess
 import threading
 import os
 import sys
 import webbrowser
 
 import webview
+
+IS_WIN = sys.platform == "win32"
+IS_MAC = sys.platform == "darwin"
+
+if IS_WIN:
+    import ctypes
+    from ctypes import wintypes
 
 WINDOW_TITLE = "GENIUSY'S Steamworks Builder"
 
@@ -50,6 +56,10 @@ class Api:
         return True
 
     def start_resize(self, edge):
+        # Only the Windows frameless window needs manual edge-resizing; on
+        # macOS the native window frame already handles it.
+        if not IS_WIN:
+            return False
         if edge not in _EDGES:
             return False
         try:
@@ -76,6 +86,7 @@ class Api:
         cb = self.config.get("contentBuilderPath", "")
         ok, msg_key, msg_params = build_engine.validate(cb)
         return {
+            "platform": sys.platform,
             "config": {
                 "contentBuilderPath": cb,
                 "steamUsername": self.config.get("steamUsername", ""),
@@ -135,16 +146,36 @@ class Api:
         try:
             if not path or not os.path.isdir(path):
                 return ""
-            for name in sorted(os.listdir(path)):
-                if name.lower().endswith(".exe") and os.path.isfile(os.path.join(path, name)):
-                    return name
+            names = sorted(os.listdir(path))
+            if IS_WIN:
+                for name in names:
+                    if name.lower().endswith(".exe") and os.path.isfile(os.path.join(path, name)):
+                        return name
+            else:
+                for name in names:
+                    if name.lower().endswith(".app") and os.path.isdir(os.path.join(path, name)):
+                        return name
+                for name in names:
+                    fp = os.path.join(path, name)
+                    if (
+                        not name.startswith(".")
+                        and "." not in name
+                        and os.path.isfile(fp)
+                        and os.access(fp, os.X_OK)
+                    ):
+                        return name
         except Exception:
             pass
         return ""
 
     def open_path(self, path):
         if path and os.path.exists(path):
-            os.startfile(path)
+            if IS_WIN:
+                os.startfile(path)
+            elif IS_MAC:
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
             return True
         return False
 
@@ -270,11 +301,38 @@ def _resize_loop(hwnd, edge):
         time.sleep(0.008)
 
 
-def _on_window_shown():
-    hwnd = ctypes.windll.user32.FindWindowW(None, WINDOW_TITLE)
-    if not hwnd:
+def _apply_mac_titlebar():
+    """Native macOS chrome: keep the traffic lights, but make the titlebar
+    transparent and extend our dark UI underneath it (the same look as
+    Electron's "hiddenInset" style). Must run on the main AppKit thread."""
+    try:
+        import AppKit
+        from PyObjCTools.AppHelper import callAfter
+    except Exception:
         return
-    _apply_win11_rounding(hwnd)
+
+    def apply():
+        try:
+            for w in AppKit.NSApplication.sharedApplication().windows():
+                if str(w.title()) == WINDOW_TITLE:
+                    w.setTitlebarAppearsTransparent_(True)
+                    w.setTitleVisibility_(AppKit.NSWindowTitleHidden)
+                    w.setStyleMask_(
+                        w.styleMask() | AppKit.NSWindowStyleMaskFullSizeContentView
+                    )
+        except Exception:
+            pass
+
+    callAfter(apply)
+
+
+def _on_window_shown():
+    if IS_WIN:
+        hwnd = ctypes.windll.user32.FindWindowW(None, WINDOW_TITLE)
+        if hwnd:
+            _apply_win11_rounding(hwnd)
+    elif IS_MAC:
+        _apply_mac_titlebar()
 
 
 def main():
@@ -288,7 +346,10 @@ def main():
         height=780,
         min_size=(940, 620),
         background_color="#0d1117",
-        frameless=True,
+        # Windows draws its own chrome (custom titlebar + resize handles in
+        # the UI); macOS/Linux use the native frame with the web titlebar
+        # sliding under the transparent native one.
+        frameless=IS_WIN,
         easy_drag=False,
     )
     api._window = window

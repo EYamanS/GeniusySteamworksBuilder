@@ -26,6 +26,8 @@ DEFAULT_CONFIG = {
 
 
 def _auto_detect_content_builder():
+    import build_engine
+
     here = app_dir()
     candidates = []
     cur = here
@@ -33,7 +35,7 @@ def _auto_detect_content_builder():
         candidates.append(os.path.join(cur, "tools", "ContentBuilder"))
         cur = os.path.dirname(cur)
     for c in candidates:
-        if os.path.isfile(os.path.join(c, "builder", "steamcmd.exe")):
+        if os.path.isfile(build_engine.paths(c)["steamcmd"]):
             return os.path.abspath(c)
     return ""
 
